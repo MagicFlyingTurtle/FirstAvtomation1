@@ -1,19 +1,31 @@
 package pages;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.regex.Pattern;
-
 public class HomePage extends  BasePage{
-    private By writeLetterButton = By.cssSelector(".primary.compose");
-    private By toInput = By.name("toFieldInput");
-    private By subjectInput = By.name("subject");
-    private By letterBody = By.id("tinymce");
-    private By sendButton = By.cssSelector(".screen__head .send.button");
-    private By bodyFrame = By.cssSelector("#mce_0_ifr");
-    private By letterIsSend = By.cssSelector(".sendmsg__ads-ready"); //Лист надіслано
+    @FindBy(css = ".primary.compose")
+    private WebElement writeLetterButton;
+
+    @FindBy(name = "toFieldInput")
+    private WebElement toInput;
+
+    @FindBy(name = "subject")
+    private WebElement subjectInput;
+
+    @FindBy(id = "tinymce")
+    private WebElement letterBody;
+
+    @FindBy(css = ".screen__head .send.button")
+    private WebElement sendButton;
+
+    @FindBy(css = "#mce_0_ifr")
+    private WebElement bodyFrame;
+
+    @FindBy(css = ".sendmsg__ads-ready")
+    private WebElement letterIsSend;
 
     public HomePage(WebDriver driver) {
         super(driver);
@@ -21,31 +33,27 @@ public class HomePage extends  BasePage{
     }
 
     public void  clickWriteLetter(){
-        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(writeLetterButton));
-        driver.findElement(writeLetterButton).click();
+        webDriverWait.until(ExpectedConditions.visibilityOf(writeLetterButton));
+        writeLetterButton.click();
     }
 
     public  void writeLetter(String to, String subject, String body) {
-        driver.findElement(toInput).sendKeys(to);
-        driver.findElement(subjectInput).sendKeys(subject);
+        toInput.sendKeys(to);
+        subjectInput.sendKeys(subject);
         try {
-            driver.switchTo().frame(driver.findElement(bodyFrame));
-            driver.findElement(letterBody).sendKeys(body);
+            driver.switchTo().frame(bodyFrame);
+            letterBody.sendKeys(body);
         }
         finally {
             driver.switchTo().parentFrame();
         }
-
     }
 
     public void sendLetter(){
-
-        driver.findElement(sendButton).click();
+        sendButton.click();
     }
 
     public boolean getTextLetterIsSend(String expectedText) {
-        return webDriverWait.until(ExpectedConditions.textMatches(letterIsSend, Pattern.compile("^"+
-                expectedText + "\n*")));
+        return webDriverWait.until(ExpectedConditions.textToBePresentInElement(letterIsSend, expectedText));
     }
-
 }

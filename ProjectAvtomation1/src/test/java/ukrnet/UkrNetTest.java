@@ -11,10 +11,9 @@ import pages.MailinatorInboxPage;
 import testdata.User;
 
 public class UkrNetTest {
-   private WebDriver driver;
-   private String login = "turtlemagic@ukr.net";
+    private WebDriver driver;
+    private String login = "turtlemagic@ukr.net";
     private String password = "qwerty15";
-
     private String bodyLetter = "Test body";
     private String subjectLetter = "MySubject";
     private String loginMailinator = "turtlemagic";
