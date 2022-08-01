@@ -1,5 +1,6 @@
 package restassureddemo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dto.OrderDto;
 import dto.PetDto;
@@ -8,16 +9,20 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.path.json.JsonPath;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestAssuredExample {
 
     private static final String BASE_URL = "https://petstore.swagger.io/v2";
     private RequestSpecification requestSpecification;
     private PetDto responsePet;
+    private PetDto requestPet;
     private OrderDto responseOrder;
+    String petId;
 
     @BeforeClass
     public void setUp() {
@@ -27,16 +32,15 @@ public class RestAssuredExample {
                 .build();
     }
 
-    @Test
-    @SneakyThrows
-    public void createPet() {
-        PetDto requestPet = PetDto
+    @BeforeMethod
+    public void createPetId() throws JsonProcessingException {
+         requestPet = PetDto
                 .builder()
                 .status("available")
                 .name("Barsik")
                 .build();
 
-        String petId = RestAssured.given()   // данные для запроса
+         petId = RestAssured.given()   // данные для запроса
                 .spec(requestSpecification)
                 .body(new ObjectMapper().writeValueAsString(requestPet))  //mapper from jackson
                 .when()  //выполнение запроса
@@ -61,9 +65,14 @@ public class RestAssuredExample {
 
         //from json to java object
         responsePet = new ObjectMapper().readValue(jsonResponsePet.prettify(), PetDto.class);
+    }
 
-         Assert.assertEquals(requestPet.getName(), responsePet.getName());
-         Assert.assertEquals(requestPet.getStatus(), responsePet.getStatus());
+    @Test
+    public void checkPet() {
+        assertThat(responsePet)
+                .usingRecursiveComparison()
+                .ignoringFields("id")
+                .isEqualTo(requestPet);
     }
 
     @Test
@@ -101,8 +110,9 @@ public class RestAssuredExample {
 
         responseOrder = new ObjectMapper().readValue(jsonResponseOrder.prettify(), OrderDto.class);
 
-        Assert.assertEquals(requestOrder.getPetId(), responseOrder.getPetId());
-        Assert.assertEquals(requestOrder.getQuantity(), responseOrder.getQuantity());
-        Assert.assertEquals(requestOrder.getStatus(), responseOrder.getStatus());
+       assertThat(responseOrder)
+                .usingRecursiveComparison()
+                .ignoringFields("id")
+                .isEqualTo(requestOrder);
     }
 }
